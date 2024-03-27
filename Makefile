@@ -1,36 +1,35 @@
-#
-# Makefile
-# swift-create-xcframework
-#
-# Created by Rob Amos on 7/5/20.
-#
+SHELL = /bin/bash
 
-PRODUCT := swift-create-xcframework
-INSTALL_DIR := /usr/local/bin
+prefix ?= /usr/local
+bindir ?= $(prefix)/bin
+libdir ?= $(prefix)/lib
+srcdir = Sources
 
-# Override this on the command line if you need to
-BUILD_FLAGS :=
+REPODIR = $(shell pwd)
+BUILDDIR = $(REPODIR)/.build
+SOURCES = $(wildcard $(srcdir)/**/*.swift)
 
-.PHONY: build build-release install install-debug
+.DEFAULT_GOAL = all
 
-default: build
-build: build-debug
+swift-create-xcframework: $(SOURCES)
+	@swift build \
+		-c release \
+		--disable-sandbox \
+		--build-path "$(BUILDDIR)"
 
-# Release Builds
+.PHONY: install
+install: swift-create-xcframework
+	@install -d "$(bindir)"
+	@install "$(wildcard $(BUILDDIR)/**/release/swift-create-xcframework)" "$(bindir)"
 
-build-release: $(wildcard Sources/*/*.swift)
-	swift build $(BUILD_FLAGS) --configuration release
+.PHONY: uninstall
+uninstall:
+	@rm -rf "$(bindir)/swift-create-xcframework"
 
-install: build-release
-	cp .build/release/swift-create-xcframework $(INSTALL_DIR)/$(PRODUCT)
-	touch -c $(INSTALL_DIR)/$(PRODUCT)
+.PHONY: clean
+distclean:
+	@rm -f $(BUILDDIR)/release
 
-# Debug builds
-
-build-debug: $(wildcard Sources/*/*.swift)
-	swift build $(BUILD_FLAGS) --configuration debug
-
-install-debug: build-debug
-	cp .build/debug/swift-create-xcframework $(INSTALL_DIR)/$(PRODUCT)
-	touch -c $(INSTALL_DIR)/$(PRODUCT)
-
+.PHONY: clean
+clean: distclean
+	@rm -rf $(BUILDDIR)
