@@ -1,3 +1,7 @@
+# NOTE:
+
+This tool is a maintained fork of the original unsignedapps/swift-create-xcframework.  This unlinked fork started off to add Xcode 15 support, after waiting for 8+ months for the original author to merge the PR.  Things like the github action, and mint installation haven't been tested.  It's currently been set up to install via `brew` or manually.  More to come, please file bugs/PRs here.
+
 # swift-create-xcframework
 
 swift-create-xcframework is a very simple tool designed to wrap `xcodebuild` and the process of creating multiple frameworks for a Swift Package and merging them into a single XCFramework.
@@ -138,10 +142,10 @@ jobs:
 
 ## Installation
 
-You can install using mint:
+You can install using brew:
 
 ```shell
-mint install unsignedapps/swift-create-xcframework
+brew install segment-integrations/formulae/swift-create-xcframework
 ```
 
 Or manually:
