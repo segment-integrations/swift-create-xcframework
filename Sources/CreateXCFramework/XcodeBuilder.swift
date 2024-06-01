@@ -109,11 +109,16 @@ struct XcodeBuilder {
             "xcodebuild",
             "-project", self.path.pathString,
             "-configuration", self.options.configuration.xcodeConfigurationName,
-            "-archivePath", self.buildDirectory.appendingPathComponent(self.productName(target: target)).appendingPathComponent(sdk.archiveName).path,
             "-destination", sdk.destination,
             "BUILD_DIR=\(self.buildDirectory.path)",
             "SKIP_INSTALL=NO"
         ]
+
+        if self.options.action == .archive {
+            command += [
+                "-archivePath", self.buildDirectory.appendingPathComponent(self.productName(target: target)).appendingPathComponent(sdk.archiveName).path,
+            ]
+        }
 
         // add SDK-specific build settings
         if let settings = sdk.buildSettings {
@@ -136,19 +141,30 @@ struct XcodeBuilder {
         command += [ "-scheme", target ]
 
         // and the command
-        command += [ "archive" ]
+        if self.options.action == .build {
+            command += [ "build" ]
+        } else {
+            command += [ "archive" ]
+        }
 
         return command
     }
 
     // we should probably pull this from the build output but we just make assumptions here
     private func frameworkPath (target: String, sdk: TargetPlatform.SDK) -> Foundation.URL {
-        return self.buildDirectory
-            .appendingPathComponent(self.productName(target: target))
-            .appendingPathComponent(sdk.archiveName)
-            .appendingPathComponent("Products/Library/Frameworks")
-            .appendingPathComponent("\(self.productName(target: target)).framework")
-            .absoluteURL
+        if self.options.action == .build {
+            return self.buildDirectory
+                .appendingPathComponent(sdk.releaseFolder)
+                .appendingPathComponent("\(self.productName(target: target)).framework")
+                .absoluteURL
+        } else {
+            return self.buildDirectory
+                .appendingPathComponent(self.productName(target: target))
+                .appendingPathComponent(sdk.archiveName)
+                .appendingPathComponent("Products/Library/Frameworks")
+                .appendingPathComponent("\(self.productName(target: target)).framework")
+                .absoluteURL
+        }
     }
 
     // MARK: - Debug Symbols

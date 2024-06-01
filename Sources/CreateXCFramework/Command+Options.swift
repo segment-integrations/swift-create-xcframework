@@ -25,6 +25,9 @@ extension Command {
         @Option(help: ArgumentHelp("Build with a specific configuration", valueName: "debug|release"))
         var configuration = PackageModel.BuildConfiguration.release
 
+        @Option(help: ArgumentHelp("Action used to create artifact", valueName: "archive|build"))
+        var action: XcodeBuildAction = .archive
+
         @Flag(inversion: .prefixedNo, help: "Whether to clean before we build")
         var clean = true
 
