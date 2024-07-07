@@ -16,7 +16,7 @@ struct BuildSetting: ExpressibleByArgument {
     let value: String
 
     init?(argument: String) {
-        let components = argument.components(separatedBy: "=")
+        let components = argument.split(separator: "=", maxSplits: 1)
         guard components.count == 2 else { return nil }
         self.name = components[0].trimmingCharacters(in: .whitespacesAndNewlines)
         self.value = components[1].trimmingCharacters(in: .whitespacesAndNewlines)
