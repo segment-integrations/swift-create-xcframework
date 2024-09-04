@@ -86,7 +86,7 @@ struct ProjectGenerator {
                 xcconfigOverrides: (self.package.overridesXcconfig?.path).flatMap { try AbsolutePath(validating: $0) },
                 useLegacySchemeGenerator: true
             ),
-            fileSystem: localFileSystem,
+            fileSystem: reallyLocalFileSystem,
             observabilityScope: self.package.observabilitySystem.topScope
         )
 #else

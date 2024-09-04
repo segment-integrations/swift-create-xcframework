@@ -21,7 +21,7 @@ import PackageLoading
 /// Errors encounter during Xcode project generation
 public enum ProjectGenerationError: Swift.Error {
     /// The given xcconfig override file does not exist
-    case xcconfigOverrideNotFound(path: AbsolutePath)
+  case xcconfigOverrideNotFound(path: AbsolutePath)
 }
 
 /// Generates the contents of the `project.pbxproj` for the package graph.  The
@@ -32,10 +32,10 @@ public enum ProjectGenerationError: Swift.Error {
 /// is the path of the root package in the package graph, independent of the
 /// directory to which the .xcodeproj is being generated.
 public func pbxproj(
-        xcodeprojPath: AbsolutePath,
+  xcodeprojPath: AbsolutePath,
         graph: PackageGraph,
-        extraDirs: [AbsolutePath],
-        extraFiles: [AbsolutePath],
+  extraDirs: [AbsolutePath],
+  extraFiles: [AbsolutePath],
         options: XcodeprojOptions,
         fileSystem: FileSystem,
         observabilityScope: ObservabilityScope
@@ -59,10 +59,10 @@ public func pbxproj(
 fileprivate let invalidXcodeModuleNames = Set(["Modules", "Headers", "Versions"])
 
 public func xcodeProject(
-    xcodeprojPath: AbsolutePath,
+  xcodeprojPath: AbsolutePath,
     graph: PackageGraph,
-    extraDirs: [AbsolutePath],
-    extraFiles: [AbsolutePath],
+  extraDirs: [AbsolutePath],
+  extraFiles: [AbsolutePath],
     options: XcodeprojOptions,
     fileSystem: FileSystem,
     observabilityScope: ObservabilityScope
@@ -103,7 +103,7 @@ public func xcodeProject(
     // directory (note that those two directories might or might be the same).
     // The effect is to make any `projectDir`-relative path be relative to the
     // source root directory, i.e. the path of the root package.
-    project.projectDir = sourceRootDir.relative(to: xcodeprojPath.parentDirectory).pathString
+  project.projectDir = sourceRootDir.relative(to: xcodeprojPath.parentDirectory.absPath).pathString
 
     // Configure the project settings.
     let projectSettings = project.buildSettings
@@ -193,7 +193,7 @@ public func xcodeProject(
         // Create a file reference for the .xcconfig file (with a path relative
         // to the group).
         xcconfigOverridesFileRef = xcconfigsGroup.addFileReference(
-            path: xcconfigPath.relative(to: sourceRootDir).pathString,
+          path: xcconfigPath.relative(to: sourceRootDir.absPath).pathString,
             name: xcconfigPath.basename)
 
         // We don't assign the file reference as the xcconfig file reference of
@@ -227,13 +227,13 @@ public func xcodeProject(
 
     // To avoid creating multiple groups for the same path, we keep a mapping
     // of the paths we've seen and the corresponding groups we've created.
-    var srcPathsToGroups: [AbsolutePath: Xcode.Group] = [:]
+  var srcPathsToGroups: [AbsolutePath: Xcode.Group] = [:]
 
     // Private helper function to make a group (or return an existing one) for
     // a particular path, including any intermediate groups that may be needed.
     // A name can be specified, if different from the last path component (any
     // custom name does not apply to any intermediate groups).
-    func makeGroup(for path: AbsolutePath, named name: String? = nil) -> Xcode.Group {
+  func makeGroup(for path: AbsolutePath, named name: String? = nil) -> Xcode.Group {
         // Check if we already have a group.
         if let group = srcPathsToGroups[path] {
             // We do, so we just return it without creating anything.
@@ -256,7 +256,7 @@ public func xcodeProject(
     // Add a mapping from the project dir to the main group, as a backstop for
     // any paths that get that far (which does not happen in standard package
     // layout).
-    srcPathsToGroups[sourceRootDir] = project.mainGroup
+  srcPathsToGroups[sourceRootDir.absPath] = project.mainGroup
 
     // Private helper function that creates a source group for one or more
     // targets (which could be regular targets, tests, etc).  If there is a
@@ -299,10 +299,10 @@ public func xcodeProject(
                 .addGroup(path: (path == "." ? "" : path), pathBase: .projectDir, name: name)
 
             // Associate the group with the target's root path.
-            srcPathsToGroups[target.sources.root] = group
+            srcPathsToGroups[target.sources.root.absPath] = group
         }
 
-        return sourcesGroup ?? srcPathsToGroups[targets[0].sources.root]
+        return sourcesGroup ?? srcPathsToGroups[targets[0].sources.root.absPath]
     }
 
     let (rootModules, testModules) = { () -> ([ResolvedTarget], [ResolvedTarget]) in
@@ -363,7 +363,7 @@ public func xcodeProject(
     // Add "blue folders" for any other directories at the top level (note that
     // they are not guaranteed to be direct children of the root directory).
     for extraDir in extraDirs {
-        project.mainGroup.addFileReference(path: extraDir.relative(to: sourceRootDir).pathString, pathBase: .projectDir)
+        project.mainGroup.addFileReference(path: extraDir.absPath.relative(to: sourceRootDir).pathString, pathBase: .projectDir)
     }
 
     for extraFile in extraFiles {
@@ -380,7 +380,7 @@ public func xcodeProject(
 
     // Mapping of targets to the path of their modulemap path, if they one.
     // It also records if the modulemap is generated by SwiftPM.
-    var modulesToModuleMap: [ResolvedTarget: (path: AbsolutePath, isGenerated: Bool)] = [:]
+  var modulesToModuleMap: [ResolvedTarget: (path: AbsolutePath, isGenerated: Bool)] = [:]
 
     // Go through all the targets, creating targets and adding file references
     // to the group tree (the specific top-level group under which they are
@@ -449,7 +449,7 @@ public func xcodeProject(
         }
 
         let infoPlistFilePath = xcodeprojPath.appending(component: target.infoPlistFileName)
-        targetSettings.common.INFOPLIST_FILE = infoPlistFilePath.relative(to: sourceRootDir).pathString
+        targetSettings.common.INFOPLIST_FILE = infoPlistFilePath.relative(to: sourceRootDir.absPath).pathString
         // The generated Info.plist has $(CURRENT_PROJECT_VERSION) as value for the CFBundleVersion key.
         // CFBundleVersion is required for apps to e.g. be submitted to the app store.
         // So we need to set it to some valid value in the project settings.
@@ -560,7 +560,7 @@ public func xcodeProject(
             // Find or make a group for the parent directory of the source file.
             // We know that there will always be one, because we created groups
             // for the source directories of all the targets.
-            let group = makeGroup(for: sourceFile.parentDirectory)
+            let group = makeGroup(for: sourceFile.parentDirectory.absPath)
 
             // Create a reference for the source file.  We don't set its file
             // type; rather, we let Xcode determine it based on the suffix.
@@ -581,10 +581,10 @@ public func xcodeProject(
             clangTarget.type == .library,
             fileSystem.isDirectory(clangTarget.includeDir) {
             let includeDir = clangTarget.includeDir
-            let includeGroup = makeGroup(for: includeDir)
+            let includeGroup = makeGroup(for: includeDir.absPath)
             // FIXME: Support C++ headers.
             for header in try walk(includeDir, fileSystem: fileSystem) where header.extension == "h" {
-                let group = makeGroup(for: header.parentDirectory)
+                let group = makeGroup(for: header.parentDirectory.absPath)
                 group.addFileReference(path: header.basename)
             }
 
@@ -594,14 +594,14 @@ public func xcodeProject(
 
             // Generate a modulemap for clangTarget (if not provided by user) and
             // add to the build settings.
-            var moduleMapPath: AbsolutePath?
+          var moduleMapPath: AbsolutePath?
 
             // If the modulemap is generated (as opposed to user provided).
             var isGenerated = false
 
             // If user provided the modulemap no need to generate.
             if case .custom(let path) = clangTarget.moduleMapType {
-                moduleMapPath = path
+                moduleMapPath = path.absPath
             } else if includeGroup.subitems.contains(where: { $0.path == clangTarget.c99name + ".h" }) {
                 // If an umbrella header exists, enable Xcode's builtin module's feature rather than generating
                 // a custom module map. This increases the compatibility of generated Xcode projects.
@@ -617,7 +617,7 @@ public func xcodeProject(
                 let path = xcodeprojPath.appending(components: "GeneratedModuleMap", clangTarget.c99name, moduleMapFilename)
                 try fileSystem.createDirectory(path.parentDirectory, recursive: true)
                 let moduleMapGenerator = ModuleMapGenerator(targetName: clangTarget.name, moduleName: clangTarget.c99name, publicHeadersDir: clangTarget.includeDir, fileSystem: fileSystem)
-                try moduleMapGenerator.generateModuleMap(type: generatedModuleMapType, at: path)
+                try moduleMapGenerator.generateModuleMap(type: generatedModuleMapType, at: path.absPath)
                 moduleMapPath = path
                 isGenerated = true
             }
@@ -684,12 +684,12 @@ public func xcodeProject(
                 assert(dependency.underlyingTarget is ClangTarget)
                 xcodeTarget.buildSettings.common.OTHER_SWIFT_FLAGS += [
                     "-Xcc",
-                    "-fmodule-map-file=$(SRCROOT)/\(moduleMap.path.relative(to: sourceRootDir).pathString)",
+                    "-fmodule-map-file=$(SRCROOT)/\(moduleMap.path.relative(to: sourceRootDir.absPath).pathString)",
                 ]
                 // Workaround for a interface generation bug. <rdar://problem/30071677>
                 if moduleMap.isGenerated {
                     xcodeTarget.buildSettings.common.HEADER_SEARCH_PATHS += [
-                        "$(SRCROOT)/\(moduleMap.path.parentDirectory.relative(to: sourceRootDir).pathString)"
+                      "$(SRCROOT)/\(moduleMap.path.parentDirectory.relative(to: sourceRootDir.absPath).pathString)"
                     ]
                 }
             }
@@ -757,7 +757,7 @@ private extension SupportedLanguageExtension {
 }
 
 private extension ResolvedTarget {
-    func fileType(forSource source: RelativePath) throws -> String {
+  func fileType(forSource source: TSCBasic.RelativePath) throws -> String {
         switch underlyingTarget {
         case is SwiftTarget:
             // SwiftModules only has one type of source so just always return this.

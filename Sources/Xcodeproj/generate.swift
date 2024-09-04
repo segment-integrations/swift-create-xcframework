@@ -20,7 +20,7 @@ import SourceControl
 import TSCBasic
 
 import struct TSCUtility.BuildFlags
-
+public typealias AbsolutePath = TSCBasic.AbsolutePath
 public struct XcodeprojOptions {
     /// The build flags.
     public var flags: PackageModel.BuildFlags
@@ -28,7 +28,7 @@ public struct XcodeprojOptions {
     /// If provided, a path to an xcconfig file to be included by the project.
     ///
     /// This allows the client to override settings defined in the project itself.
-    public var xcconfigOverrides: AbsolutePath?
+  public var xcconfigOverrides: AbsolutePath?
 
     /// Whether code coverage should be enabled in the generated scheme.
     public var isCodeCoverageEnabled: Bool
@@ -64,9 +64,9 @@ public struct XcodeprojOptions {
 
 public enum XcodeProject {
     // Determine the path of the .xcodeproj wrapper directory.
-    public static func makePath(outputDir: AbsolutePath, projectName: String) throws -> AbsolutePath {
+  public static func makePath(outputDir: AbsolutePath, projectName: String) throws -> AbsolutePath {
         let xcodeprojName = "\(projectName).xcodeproj"
-        return try AbsolutePath(validating: xcodeprojName, relativeTo: outputDir)
+    return try AbsolutePath(validating: xcodeprojName, relativeTo: outputDir)
     }
 
     /// Generates an Xcode project and all needed support files.  The .xcodeproj
@@ -88,8 +88,8 @@ public enum XcodeProject {
         // Note that the output directory might be completely separate from the
         // path of the root package (which is where the sources live).
 
-        let srcroot = graph.rootPackages[0].path
-
+      let srcroot = try AbsolutePath(validating: graph.rootPackages[0].path.pathString)
+      
         // Determine the path of the scheme directory (it's inside the .xcodeproj).
         let schemesDir = xcodeprojPath.appending(components: "xcshareddata", "xcschemes")
 
@@ -97,16 +97,16 @@ public enum XcodeProject {
         try makeDirectories(xcodeprojPath)
         try makeDirectories(schemesDir)
 
-        let extraDirs: [AbsolutePath]
-        var extraFiles = [AbsolutePath]()
+      let extraDirs: [AbsolutePath]
+      var extraFiles = [AbsolutePath]()
 
         if options.addExtraFiles {
             // Find the paths of any extra directories that should be added as folder
             // references in the project.
             extraDirs = try findDirectoryReferences(path: srcroot)
-
-            if try repositoryProvider.workingCopyExists(at: srcroot) {
-                let workingCheckout = try repositoryProvider.openWorkingCopy(at: srcroot)
+            let basicSRCRoot = try Basics.AbsolutePath(validating: srcroot.pathString)
+            if try repositoryProvider.workingCopyExists(at: basicSRCRoot) {
+                let workingCheckout = try repositoryProvider.openWorkingCopy(at: basicSRCRoot)
                 extraFiles = try getExtraFilesFor(package: graph.rootPackages[0], in: workingCheckout)
             }
         } else {
@@ -146,7 +146,7 @@ public enum XcodeProject {
             ///// For framework targets, generate target.c99Name_Info.plist files in the
             ///// directory that Xcode project is generated
             let name = target.infoPlistFileName
-            try open(AbsolutePath(validating: name, relativeTo: xcodeprojPath)) { print in
+          try open(AbsolutePath(validating: name, relativeTo: xcodeprojPath)) { print in
                 print("""
                     <?xml version="1.0" encoding="UTF-8"?>
                     <plist version="1.0">
@@ -202,7 +202,7 @@ public enum XcodeProject {
     ///
     /// This method doesn't rewrite the file in case the new and old contents of
     /// file are same.
-    static func open(_ path: AbsolutePath, body: ((String) -> Void) throws -> Void) throws {
+  static func open(_ path: AbsolutePath, body: ((String) -> Void) throws -> Void) throws {
         let stream = BufferedOutputByteStream()
         try body { line in
             stream <<< line
@@ -211,17 +211,17 @@ public enum XcodeProject {
         // If the file exists with the identical contents, we don't need to rewrite it.
         //
         // This avoids unnecessarily triggering Xcode reloads of the project file.
-        if let contents = try? localFileSystem.readFileContents(path), contents == stream.bytes {
+    if let contents = try? TSCBasic.localFileSystem.readFileContents(path), contents == stream.bytes {
             return
         }
 
         // Write the real file.
-        try localFileSystem.writeFileContents(path, bytes: stream.bytes)
+    try TSCBasic.localFileSystem.writeFileContents(path, bytes: stream.bytes)
     }
 
     /// Finds directories that will be added as blue folder
     /// Excludes hidden directories, Xcode projects and reserved directories
-    static func findDirectoryReferences(path: AbsolutePath) throws -> [AbsolutePath] {
+  static func findDirectoryReferences(path: AbsolutePath) throws -> [AbsolutePath] {
         let rootDirectories = try walk(path, recursively: false)
 
         return rootDirectories.filter({
@@ -229,7 +229,7 @@ public enum XcodeProject {
             if $0.suffix == ".playground" { return false }
             if $0.basename.hasPrefix(".") { return false }
             if PackageBuilder.predefinedTestDirectories.contains($0.basename) { return false }
-            return localFileSystem.isDirectory($0)
+          return TSCBasic.localFileSystem.isDirectory($0)
         })
     }
 
@@ -246,7 +246,7 @@ public enum XcodeProject {
             // -Package so its name doesn't collide with any products or target with
             // same name.
             let schemeName = "\(graph.rootPackages[0].manifest.displayName)-Package.xcscheme" // TODO: use identity instead?
-            try open(AbsolutePath(validating: schemeName, relativeTo: schemesDir)) { stream in
+          try open(AbsolutePath(validating: schemeName, relativeTo: schemesDir)) { stream in
                 legacySchemeGenerator(
                     container: schemeContainer,
                     graph: graph,
@@ -278,27 +278,29 @@ public enum XcodeProject {
                 container: schemeContainer,
                 schemesDir: schemesDir,
                 isCodeCoverageEnabled: options.isCodeCoverageEnabled,
-                fs: localFileSystem
+                fs: TSCBasic.localFileSystem
             ).generate()
         }
     }
 
     // Find and return non-source files in the source directories and root that should be added
     // as a reference to the project.
-    static func getExtraFilesFor(package: ResolvedPackage, in workingCheckout: WorkingCheckout) throws -> [AbsolutePath] {
+  static func getExtraFilesFor(package: ResolvedPackage, in workingCheckout: WorkingCheckout) throws -> [AbsolutePath] {
         let srcroot = package.path
-        var extraFiles = findNonSourceFiles(path: srcroot, toolsVersion: package.manifest.toolsVersion, recursively: false)
+        let basicSRCRoot = try AbsolutePath(validating: package.path.pathString)
+        var extraFiles = findNonSourceFiles(path: basicSRCRoot, toolsVersion: package.manifest.toolsVersion, recursively: false)
 
         for target in package.targets {
             let sourcesDirectory = target.sources.root
-            if localFileSystem.isDirectory(sourcesDirectory) {
-                let sourcesExtraFiles = findNonSourceFiles(path: sourcesDirectory, toolsVersion: package.manifest.toolsVersion, recursively: true)
+          let basicSourcesDirectory = try AbsolutePath(validating: sourcesDirectory.pathString)
+          if TSCBasic.localFileSystem.isDirectory(sourcesDirectory) {
+                let sourcesExtraFiles = findNonSourceFiles(path: basicSourcesDirectory, toolsVersion: package.manifest.toolsVersion, recursively: true)
                 extraFiles.append(contentsOf: sourcesExtraFiles)
             }
         }
 
         // Return if we can't determine if the files are git ignored.
-        guard let isIgnored = try? workingCheckout.areIgnored(extraFiles) else {
+    guard let isIgnored = try? workingCheckout.areIgnored(extraFiles.map { try Basics.AbsolutePath(validating: $0.pathString) }) else {
             return []
         }
         extraFiles = extraFiles.enumerated().filter({ !isIgnored[$0.offset] }).map({ $0.element })
@@ -310,14 +312,14 @@ public enum XcodeProject {
     /// - parameters:
     ///   - path: The path of the directory to get the files from
     ///   - recursively: Specifies if the directory at `path` should be searched recursively
-    static func findNonSourceFiles(path: AbsolutePath, toolsVersion: ToolsVersion, recursively: Bool) -> [AbsolutePath] {
+  static func findNonSourceFiles(path: AbsolutePath, toolsVersion: ToolsVersion, recursively: Bool) -> [AbsolutePath] {
         let filesFromPath: RecursibleDirectoryContentsGenerator?
 
         if recursively {
             filesFromPath = try? walk(path, recursing: { path in
                 // Ignore any git submodule that we might encounter.
                 let gitPath = path.appending(component: ".git")
-                if localFileSystem.exists(gitPath) {
+              if TSCBasic.localFileSystem.exists(gitPath) {
                     return false
                 }
                 return recursively
@@ -327,7 +329,7 @@ public enum XcodeProject {
         }
 
         return filesFromPath?.filter({
-            if !localFileSystem.isFile($0) { return false }
+          if !TSCBasic.localFileSystem.isFile($0) { return false }
             if $0.basename.hasPrefix(".") { return false }
             if $0.basename == "Package.resolved" { return false }
             if let `extension` = $0.extension, SupportedLanguageExtension.validExtensions(toolsVersion: toolsVersion).contains(`extension`) {

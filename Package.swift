@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.10
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -7,7 +7,23 @@ let dependencies: [Package.Dependency]
 let versionedTargets: [Target]
 let versionedDependencies: [Target.Dependency]
 
-#if swift(>=5.9)
+#if swift(>=5.10)
+dependencies = [
+  .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.3"),
+  .package(url: "https://github.com/apple/swift-package-manager.git", branch: "release/5.10"),
+//  .package(url: "https://github.com/apple/swift-tools-support-core.git", branch: "release/5.10"),
+]
+versionedTargets = [
+    .target(
+        name: "Xcodeproj",
+        dependencies: [
+            .product(name: "SwiftPM-auto", package: "swift-package-manager"),
+//            .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
+        ]
+    )
+]
+versionedDependencies = ["Xcodeproj"]
+#elseif swift(>=5.9)
 dependencies = [
     .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("1.2.3")),
     .package(name: "SwiftPM", url: "https://github.com/apple/swift-package-manager.git", .branch("release/5.9")),
@@ -58,7 +74,11 @@ versionedDependencies = []
 #endif
 
 let platforms: [SupportedPlatform]
-#if swift(>=5.6)
+#if swift(>=5.10)
+platforms = [
+    .macOS(.v12),
+]
+#elseif swift(>=5.6)
 platforms = [
     .macOS(.v11),
 ]
@@ -83,8 +103,8 @@ let package = Package(
     targets: versionedTargets + [
         .target(name: "CreateXCFramework", dependencies: versionedDependencies + [
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
-            .product(name: "SwiftPM-auto", package: "SwiftPM"),
-            .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
+            .product(name: "SwiftPM-auto", package: "swift-package-manager"),
+//            .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
         ]),
         .testTarget(name: "CreateXCFrameworkTests", dependencies: [ "CreateXCFramework" ]),
     ],
