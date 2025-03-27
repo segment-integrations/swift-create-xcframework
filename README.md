@@ -95,7 +95,7 @@ Because of the low-friction to adding command line options with [swift-argument-
 
 ## Packaging for distribution
 
-swift-create-xcframework provides a `--zip` option to automatically zip up your newly created XCFrameworks ready for upload to GitHub as a release artefact, or anywhere you choose.
+swift-create-xcframework provides a `--zip` option to automatically zip up your newly created XCFrameworks ready for upload to GitHub as a release artifact, or anywhere you choose.
 
 If the target you are creating an XCFramework happens to be a dependency, swift-create-xcframework will look back into the package graph, locate the version that dependency resolved to, and append the version number to your zip file name. eg: `ArgumentParser-0.0.6.zip`
 
