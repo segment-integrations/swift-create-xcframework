@@ -84,7 +84,8 @@ struct ProjectGenerator {
             extraFiles: [],
             options: XcodeprojOptions (
                 xcconfigOverrides: (self.package.overridesXcconfig?.path).flatMap { try AbsolutePath(validating: $0) },
-                useLegacySchemeGenerator: true
+                useLegacySchemeGenerator: true,
+                skipBinaryTargets: package.options.skipBinaryTargets
             ),
             fileSystem: localFileSystem,
             observabilityScope: self.package.observabilitySystem.topScope
@@ -97,7 +98,8 @@ struct ProjectGenerator {
             extraFiles: [],
             options: XcodeprojOptions (
                 xcconfigOverrides: (self.package.overridesXcconfig?.path).flatMap { AbsolutePath($0) },
-                useLegacySchemeGenerator: true
+                useLegacySchemeGenerator: true,
+                skipBinaryTargets: package.options.skipBinaryTargets
             ),
             diagnostics: self.package.diagnostics
         )

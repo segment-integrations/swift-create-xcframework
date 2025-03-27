@@ -45,13 +45,16 @@ public struct XcodeprojOptions {
     /// Reference to manifest loader, if present.
     public var manifestLoader: ManifestLoader?
 
+    public var skipBinaryTargets: Bool
+
     public init(
         flags: PackageModel.BuildFlags = PackageModel.BuildFlags(),
         xcconfigOverrides: AbsolutePath? = nil,
         isCodeCoverageEnabled: Bool? = nil,
         useLegacySchemeGenerator: Bool? = nil,
         enableAutogeneration: Bool? = nil,
-        addExtraFiles: Bool? = nil
+        addExtraFiles: Bool? = nil,
+        skipBinaryTargets: Bool? = nil
     ) {
         self.flags = flags
         self.xcconfigOverrides = xcconfigOverrides
@@ -59,6 +62,7 @@ public struct XcodeprojOptions {
         self.useLegacySchemeGenerator = useLegacySchemeGenerator ?? false
         self.enableAutogeneration = enableAutogeneration ?? false
         self.addExtraFiles = addExtraFiles ?? true
+        self.skipBinaryTargets = skipBinaryTargets ?? false
     }
 }
 
