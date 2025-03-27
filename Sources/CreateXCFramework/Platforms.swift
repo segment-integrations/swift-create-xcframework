@@ -14,6 +14,7 @@ enum TargetPlatform: String, ExpressibleByArgument, CaseIterable {
     case maccatalyst
     case tvos
     case watchos
+    case visionos
 
     init?(argument: String) {
         self.init(rawValue: argument.lowercased())
@@ -27,6 +28,7 @@ enum TargetPlatform: String, ExpressibleByArgument, CaseIterable {
         case .maccatalyst:  return "macos"
         case .tvos:         return "tvos"
         case .watchos:      return "watchos"
+        case .visionos:     return "visionos"
         }
     }
 
@@ -105,6 +107,21 @@ enum TargetPlatform: String, ExpressibleByArgument, CaseIterable {
                     destination: "generic/platform=watchOS Simulator",
                     archiveName: "watchsimulator.xcarchive",
                     releaseFolder: "Release-watchsimulator",
+                    buildSettings: nil
+                )
+            ]
+        case .visionos:
+            return [
+                SDK (
+                    destination: "generic/platform=visionOS",
+                    archiveName: "visionos.xcarchive",
+                    releaseFolder: "Release-xros",
+                    buildSettings: nil
+                ),
+                SDK (
+                    destination: "generic/platform=visionOS Simulator",
+                    archiveName: "visionsimulator.xcarchive",
+                    releaseFolder: "Release-xrsimulator",
                     buildSettings: nil
                 )
             ]
