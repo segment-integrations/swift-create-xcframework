@@ -77,6 +77,8 @@ extension Command {
         @Flag(help: .hidden)
         var githubAction: Bool = false
 
+        @Flag(help: "Skip binary targets for project generation. Useful for creating and distributing a library from one Package.swift")
+        var skipBinaryTargets: Bool = false
 
         // MARK: - Targets
 

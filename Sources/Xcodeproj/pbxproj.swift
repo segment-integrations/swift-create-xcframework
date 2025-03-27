@@ -396,7 +396,13 @@ public func xcodeProject(
             productType = .framework
         case .test:
             productType = .unitTest
-        case .systemModule, .binary, .plugin, .macro:
+        case .binary:
+            if options.skipBinaryTargets {
+                continue
+            } else {
+                fallthrough
+            }
+        case .systemModule, .plugin, .macro:
             throw InternalError("\(target.type) not supported")
         }
 
