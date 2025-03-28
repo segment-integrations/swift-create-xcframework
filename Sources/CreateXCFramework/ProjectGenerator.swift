@@ -87,7 +87,7 @@ struct ProjectGenerator {
                 useLegacySchemeGenerator: true,
                 skipBinaryTargets: package.options.skipBinaryTargets
             ),
-            fileSystem: localFileSystem,
+            fileSystem: reallyLocalFileSystem,
             observabilityScope: self.package.observabilitySystem.topScope
         )
 #else

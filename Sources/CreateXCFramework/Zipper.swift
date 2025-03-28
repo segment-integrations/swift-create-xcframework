@@ -113,8 +113,8 @@ struct Zipper {
     }
 
     #if swift(>=5.7)
-    private func checksum(forBinaryArtifactAt path: AbsolutePath) throws -> String {
-        let fileSystem = localFileSystem
+  private func checksum(forBinaryArtifactAt path: TSCBasic.AbsolutePath) throws -> String {
+    let fileSystem = TSCBasic.localFileSystem
         let checksumAlgorithm = SHA256()
         let archiver = ZipArchiver(fileSystem: fileSystem)
 

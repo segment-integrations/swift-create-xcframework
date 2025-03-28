@@ -44,7 +44,7 @@ public final class SchemesGenerator {
 
     private let graph: PackageGraph
     private let container: String
-    private let schemesDir: AbsolutePath
+  private let schemesDir: AbsolutePath
     private let isCodeCoverageEnabled: Bool
     private let fs: FileSystem
 
@@ -208,12 +208,12 @@ public final class SchemesGenerator {
 
             """
 
-        let file = try AbsolutePath(validating: scheme.filename, relativeTo: schemesDir)
+      let file = try AbsolutePath(validating: scheme.filename, relativeTo: schemesDir)
         try fs.writeFileContents(file, bytes: stream.bytes)
     }
 
     private func disableSchemeAutoCreation() throws {
-        let workspacePath = try AbsolutePath(validating: "../../project.xcworkspace", relativeTo: schemesDir)
+      let workspacePath = try AbsolutePath(validating: "../../project.xcworkspace", relativeTo: schemesDir)
 
         // Write the settings file to disable automatic scheme creation.
         var stream = BufferedOutputByteStream()
@@ -227,12 +227,12 @@ public final class SchemesGenerator {
             </dict>
             </plist>
             """
-        let settingsPlist = try AbsolutePath(validating: "xcshareddata/WorkspaceSettings.xcsettings", relativeTo: workspacePath)
+      let settingsPlist = try AbsolutePath(validating: "xcshareddata/WorkspaceSettings.xcsettings", relativeTo: workspacePath)
         try fs.createDirectory(settingsPlist.parentDirectory, recursive: true)
         try fs.writeFileContents(settingsPlist, bytes: stream.bytes)
 
         // Write workspace contents file.
-        let contentsFile = try AbsolutePath(validating: "contents.xcworkspacedata", relativeTo: workspacePath)
+      let contentsFile = try AbsolutePath(validating: "contents.xcworkspacedata", relativeTo: workspacePath)
         stream = BufferedOutputByteStream()
         stream <<< """
             <?xml version="1.0" encoding="UTF-8"?>

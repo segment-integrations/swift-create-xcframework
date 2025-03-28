@@ -84,13 +84,13 @@ struct PackageInfo {
         self.rootDirectory = Foundation.URL(fileURLWithPath: options.packagePath, isDirectory: true).absoluteURL
         self.buildDirectory = self.rootDirectory.appendingPathComponent(options.buildPath, isDirectory: true).absoluteURL
 
-        let root = try AbsolutePath(validating: self.rootDirectory.path)
+      let root = try TSCBasic.AbsolutePath(validating: self.rootDirectory.path)
 
         self.toolchain = try UserToolchain(destination: try .hostDestination())
 
         #if swift(>=5.7)
         let loader = ManifestLoader(toolchain: self.toolchain)
-        self.workspace = try Workspace(forRootPackage: root, customManifestLoader: loader)
+        self.workspace = try Workspace(forRootPackage: root.absPath, customManifestLoader: loader)
         #elseif swift(>=5.6)
         let resources = ToolchainConfiguration(swiftCompilerPath: self.toolchain.swiftCompilerPath)
         let loader = ManifestLoader(toolchain: resources)
@@ -106,12 +106,12 @@ struct PackageInfo {
         #endif
 
         #if swift(>=5.6)
-        self.graph = try workspace.loadPackageGraph(rootPath: root, observabilityScope: self.observabilitySystem.topScope)
+        self.graph = try workspace.loadPackageGraph(rootPath: root.absPath, observabilityScope: self.observabilitySystem.topScope)
         let workspace = self.workspace
         let scope = observabilitySystem.topScope
         self.manifest = try tsc_await {
             workspace.loadRootManifest(
-                at: root,
+                at: root.absPath,
                 observabilityScope: scope,
                 completion: $0
             )

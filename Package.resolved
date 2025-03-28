@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/apple/swift-asn1.git",
         "state": {
           "branch": null,
-          "revision": "805deae27a7506dcad043604c00a9dc52d465dcb",
-          "version": "0.7.0"
+          "revision": "df5d2fcd22e3f480e3ef85bf23e277a4a0ef524d",
+          "version": "1.2.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/apple/swift-certificates.git",
         "state": {
           "branch": null,
-          "revision": "35a7df2d9d71c401a47de9be2e3de629a01370c2",
-          "version": "0.4.1"
+          "revision": "83640c8097acaec17c9835a083e89678cb0f2b66",
+          "version": "1.3.0"
         }
       },
       {
@@ -42,16 +42,16 @@
         "repositoryURL": "https://github.com/apple/swift-crypto.git",
         "state": {
           "branch": null,
-          "revision": "33a20e650c33f6d72d822d558333f2085effa3dc",
-          "version": "2.5.0"
+          "revision": "629f0b679d0fd0a6ae823d7f750b9ab032c00b80",
+          "version": "3.0.0"
         }
       },
       {
         "package": "swift-driver",
         "repositoryURL": "https://github.com/apple/swift-driver.git",
         "state": {
-          "branch": "release/5.9",
-          "revision": "1b2b851ae4718caffa5f18fd1861bc0ddd1791a3",
+          "branch": "release/5.10",
+          "revision": "b461fd4fc51be8e1f2a3f4a2184b664b8846b46f",
           "version": null
         }
       },
@@ -59,8 +59,8 @@
         "package": "llbuild",
         "repositoryURL": "https://github.com/apple/swift-llbuild.git",
         "state": {
-          "branch": "release/5.9",
-          "revision": "d73a305d6e5a82e4bf3bf1727da3d1376e87efab",
+          "branch": "release/5.10",
+          "revision": "fd7c2e0d9279edd023ced6b0a590f8407f5472f9",
           "version": null
         }
       },
@@ -68,8 +68,8 @@
         "package": "SwiftPM",
         "repositoryURL": "https://github.com/apple/swift-package-manager.git",
         "state": {
-          "branch": "release/5.9",
-          "revision": "732d5406df67b64d266c5689454cf52aecbb4d57",
+          "branch": "release/5.10",
+          "revision": "b5f8ad931b7a40b81f64765fa08c2751164759b4",
           "version": null
         }
       },
@@ -86,8 +86,8 @@
         "package": "swift-tools-support-core",
         "repositoryURL": "https://github.com/apple/swift-tools-support-core.git",
         "state": {
-          "branch": "release/5.9",
-          "revision": "5665fc7641ce1a971ad06faaa476862b222ef44b",
+          "branch": "release/5.10",
+          "revision": "90bdc2a157ebacc5d3de0c83e085d05d22ca5fa0",
           "version": null
         }
       },
