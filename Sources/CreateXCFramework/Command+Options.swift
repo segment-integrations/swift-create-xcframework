@@ -80,6 +80,9 @@ extension Command {
         @Flag(help: "Skip binary targets for project generation. Useful for creating and distributing a library from one Package.swift")
         var skipBinaryTargets: Bool = false
 
+        @Flag(help: "Specifies that the created xcframework contains information not suitable for public distribution.")
+        var allowInternalDistribution: Bool = false
+
         // MARK: - Targets
 
         @Argument(help: "An optional list of products (or targets) to build. Defaults to building all `.library` products")
