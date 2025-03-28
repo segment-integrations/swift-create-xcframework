@@ -306,6 +306,10 @@ struct XcodeBuilder {
             return args
         }
 
+        if self.package.options.allowInternalDistribution {
+            command += [ "-allow-internal-distribution" ]
+        }
+
         // and the output
         command += [ "-output", outputPath.path ]
 
